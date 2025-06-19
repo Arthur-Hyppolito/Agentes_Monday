@@ -41,49 +41,27 @@ class AgentePre:
         """
         Processa o texto de entrada, realizando limpeza e pré-processamento.
         
-        Args:
-            texto (str): Texto de entrada (transcrição ou comando)
-            
-        Returns:
-            dict: Texto processado com metadados
-        """
         logger.info("Iniciando processamento do texto...")
         
-        # 1. Remover caracteres especiais e pontuação
-        texto_limpo = re.sub(r'[^\w\s]', '', texto)
+        # 1. Remover caracteres especiais
+        texto_limpo = re.sub(r'[^\w\s.,!?@#$%&*()\-_=+]', '', texto)
         
-        # 2. Converter para minúsculas
-        texto_limpo = texto_limpo.lower()
-        
-        # 3. Tokenização
+        # 2. Tokenização
         tokens = word_tokenize(texto_limpo, language='portuguese')
         
-        # 4. Remover stopwords
-        tokens_filtrados = [token for token in tokens if token not in self.stop_words]
+        # 3. Remover stopwords
+        stop_words = set(stopwords.words('portuguese'))
+        tokens_filtrados = [token for token in tokens if token.lower() not in stop_words]
         
-        # 5. Lematização
-        tokens_lematizados = [self.lemmatizer.lemmatize(token) for token in tokens_filtrados]
+        # 4. Lematização
+        lemmatizer = WordNetLemmatizer()
+        tokens_lematizados = [lemmatizer.lemmatize(token) for token in tokens_filtrados]
         
-        # 6. Processamento com spaCy para correção gramatical
-        doc = self.nlp(' '.join(tokens_lematizados))
-        
-        # 7. Reconstruir o texto processado
-        texto_final = ' '.join([token.text for token in doc])
-        
-        # 8. Gerar metadados
-        metadados = {
-            'palavras_unicas': len(set(tokens_filtrados)),
-            'sentencas': sum(1 for _ in doc.sents),
-            'data_processamento': str(doc._.date)
-        }
+        # 5. Reconstituir texto
+        texto_processado = ' '.join(tokens_lematizados)
         
         logger.info("Processamento do texto concluído!")
-        
-        return {
-            'texto_processado': texto_final,
-            'metadados': metadados,
-            'status': 'sucesso'
-        }
+        return texto_processado
 
     def validar_texto(self, texto: str) -> bool:
         """
