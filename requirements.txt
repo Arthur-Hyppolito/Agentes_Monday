@@ -1,0 +1,12 @@
+requests==2.31.0
+python-dotenv==1.0.0
+spacy==3.7.2
+nltk==3.8.1
+transformers==4.36.0
+torch==2.1.0
+python-dateutil==2.8.2
+python-magic==0.4.27
+monday==1.0.1
+pytest==7.4.4
+pandas==2.1.0
+numpy==1.24.3
