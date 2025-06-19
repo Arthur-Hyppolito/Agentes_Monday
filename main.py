@@ -75,7 +75,9 @@ class SistemaMultiagentes:
             
             return {
                 'sucesso': True,
-                'resultado': resultado,
+                'entidades_validas': validacao['entidades_validas'],
+                'acao': validacao['acao'],
+                'prioridade': validacao['prioridade'],
                 'metricas': self.agentes['boss'].obter_metricas_operacao()
             }
             
