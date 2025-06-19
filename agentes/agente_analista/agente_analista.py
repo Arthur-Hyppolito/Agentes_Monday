@@ -7,22 +7,36 @@ logger = logging.getLogger(__name__)
 
 class AgenteAnalista:
     def __init__(self):
-        """Inicializa o AgenteAnalista com os modelos necessários"""
+        """Inicializa o AgenteAnalista."""
         logger.info("Inicializando AgenteAnalista...")
         
-        # Carregar modelo do spaCy para português
         try:
+            # Carregar modelo do spaCy para português
             self.nlp = spacy.load(Config.NLP_MODEL)
-        except OSError:
-            logger.error(f"Modelo do spaCy não encontrado: {Config.NLP_MODEL}")
+            
+            # Carregar tokenizer e modelo BERT
+            self.tokenizer = BertTokenizer.from_pretrained('neuralmind/bert-base-portuguese-cased')
+            self.model = BertForSequenceClassification.from_pretrained(
+                'neuralmind/bert-base-portuguese-cased',
+                num_labels=4
+            )
+            
+            # Configurar dispositivo
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            self.model.to(self.device)
+            
+            # Carregar modelo de classificação de intenções
+            self.classificador = pipeline(
+                'text-classification',
+                model='neuralmind/bert-base-portuguese-cased',
+                tokenizer='neuralmind/bert-base-portuguese-cased'
+            )
+            
+            logger.info("AgenteAnalista inicializado com sucesso!")
+            
+        except Exception as e:
+            logger.error(f"Erro ao inicializar AgenteAnalista: {str(e)}")
             raise
-        
-        # Carregar modelo de classificação de intenções
-        self.classificador = pipeline(
-            'text-classification',
-            model='neuralmind/bert-base-portuguese-cased',
-            tokenizer='neuralmind/bert-base-portuguese-cased'
-        )
         
         # Definir entidades e ações conhecidas
         self.entidades_conhecidas = {
