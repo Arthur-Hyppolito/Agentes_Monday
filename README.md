@@ -2,41 +2,36 @@
 
 Este sistema é composto por 6 agentes especializados que trabalham em conjunto para processar transcrições de texto e automatizar a gestão de tarefas no Monday.com.
 
-## Agentes do Sistema
+## Funcionalidades Principais
+
+- **Criação automática de projetos e pessoas no Monday.com**: O sistema detecta nomes de projetos e usuários inexistentes e os cria automaticamente via API, tornando o fluxo totalmente automatizado a partir de comandos ou transcrições.
+- **Processamento de transcrições e comandos em linguagem natural**: Extração de tarefas, responsáveis, datas, prioridades e projetos a partir de texto livre.
+- **Validação, resolução de ambiguidades e aplicação de regras de negócio**: Garante integridade dos dados antes de executar ações.
+- **Integração multiagente modular**: Cada etapa (pré-processamento, análise, validação, mapeamento, execução e monitoramento) é realizada por um agente especializado, facilitando manutenção e evolução.
+- **Fluxo end-to-end**: Desde a entrada de texto/transcrição até a criação de itens, projetos e usuários no Monday.com, sem intervenção manual.
+- **Logging detalhado e métricas de desempenho**: Todas as operações são registradas e analisadas para melhoria contínua.
+
+## Exemplo de Uso
+
+1. Usuário fornece um texto/transcrição, como:
+   > "João Silva precisa criar uma tarefa para o projeto XPTO até 30/06/2025."
+2. O sistema identifica entidades, valida, cria projetos/pessoas se necessário e executa a ação no Monday.com.
+3. Resultado e métricas são exibidos ao final do processamento.
+
+## Arquitetura dos Agentes
 
 1. **AgentePre (Transcritor & Limpador)**
    - Limpeza e pré-processamento de texto
-   - Correção de erros ortográficos
-   - Padronização do formato
-
 2. **AgenteAnalista (Interpretador de Intenções)**
-   - Análise semântica
-   - Extração de entidades
-   - Identificação de ações
-   - Estruturação de dados
-
+   - Extração de entidades e ações
 3. **AgenteValidador (Verificador de Integridade)**
-   - Validação cruzada de dados
-   - Resolução de ambiguidades
-   - Detecção de conflitos
-   - Sinalização para intervenção humana
-
+   - Validação cruzada e sinalização de entidades a criar
 4. **AgenteMapeaMonday (Tradutor de API)**
-   - Mapeamento de entidades para o Monday.com
-   - Construção de payloads GraphQL
-   - Aplicação de regras de negócio
-
+   - Mapeamento para payloads GraphQL
 5. **AgenteExecutor (Executor de API)**
-   - Integração com a API do Monday.com
-   - Gerenciamento de autenticação
-   - Tratamento de erros e limites
-   - Logging de operações
-
+   - Criação automática de projetos/pessoas e execução de mutations
 6. **AgenteBoss (Otimizador de Aprendizagem)**
-   - Supervisão do sistema
-   - Coleta de feedback
-   - Análise de desempenho
-   - Otimização contínua
+   - Supervisão e análise de desempenho
 
 ## Requisitos
 
