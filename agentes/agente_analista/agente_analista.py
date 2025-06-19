@@ -122,8 +122,8 @@ class AgenteAnalista:
         
         # Criar estrutura de intenções
         intencoes = {
+            'entidades_validas': entidades,
             'acoes': acoes,
-            'entidades': entidades,
             'objetivo': None,
             'prioridade': None
         }
