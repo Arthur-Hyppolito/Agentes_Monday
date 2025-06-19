@@ -1,22 +1,20 @@
 from main import SistemaMultiagentes
 
-# Criar instância do sistema
+# Inicializar sistema
 sistema = SistemaMultiagentes()
 
 # Texto de exemplo
 texto = """
-Precisamos criar uma tarefa para o projeto Marketing.
-A tarefa é desenvolver um novo design para o site.
-Responsável: João Silva.
-Data de entrega: sexta-feira.
-Prioridade: alta.
+João Silva precisa criar uma tarefa para o projeto XPTO até 30/06/2025.
+A tarefa é de alta prioridade e deve ser concluída até 30/06/2025.
 """
 
-# Processar o texto
+# Processar texto
 resultado = sistema.processar_transcricao(texto)
 
 # Mostrar resultados
-print("\nResultados:")
-print(f"Entidades extraídas: {resultado['entidades']}")
-print(f"Ações identificadas: {resultado['acoes']}")
+print(f"\nResultados:")
+print(f"Entidades válidas: {resultado['entidades_validas']}")
+print(f"Ação: {resultado['acao']}")
+print(f"Prioridade: {resultado['prioridade']}")
 print(f"Métricas: {resultado['metricas']}")
