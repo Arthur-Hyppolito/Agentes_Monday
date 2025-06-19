@@ -189,6 +189,113 @@ class AgenteValidador:
             
         return True
 
+    def validar_intencoes(self, intencoes: dict) -> dict:
+        """Valida as intenções e entidades extraídas do texto."""
+        logger.info("Iniciando validação de intenções...")
+        
+        # Validar entidades
+        entidades = intencoes['entidades_validas']
+        
+        # Validar pessoas
+        pessoas_validas = []
+        for pessoa in entidades['pessoas']:
+            # Consultar API do Monday.com para verificar se a pessoa existe
+            query = '''
+                query($name: String!) {
+                    users(name: $name) {
+                        id
+                        name
+                        email
+                    }
+                }
+            '''
+            response = requests.post(
+                Config.MONDAY_API_URL,
+                json={'query': query, 'variables': {'name': pessoa}},
+                headers=self.headers
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data['data']['users']:
+                    pessoas_validas.append(data['data']['users'][0]['id'])
+                else:
+                    logger.warning(f"Pessoa não encontrada: {pessoa}")
+            else:
+                logger.warning(f"Pessoa não encontrada: {pessoa}")
+        
+        # Validar projetos
+        projetos_validos = []
+        for projeto in entidades['projetos']:
+            # Consultar API do Monday.com para verificar se o projeto existe
+            query = '''
+                query($name: String!) {
+                    boards(name: $name) {
+                        id
+                        name
+                    }
+                }
+            '''
+            response = requests.post(
+                Config.MONDAY_API_URL,
+                json={'query': query, 'variables': {'name': projeto}},
+                headers=self.headers
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data['data']['boards']:
+                    projetos_validos.append(data['data']['boards'][0]['id'])
+                else:
+                    logger.warning(f"Projeto não encontrado: {projeto}")
+            else:
+                logger.warning(f"Projeto não encontrado: {projeto}")
+        
+        # Validar datas
+        datas_validas = []
+        for data in entidades['datas']:
+            try:
+                # Converter string de data para datetime
+                dt = datetime.strptime(data, '%d/%m/%Y')
+                datas_validas.append(dt)
+            except ValueError:
+                logger.warning(f"Data inválida: {data}")
+        
+        # Verificar regras de negócio
+        conflitos = []
+        dados_faltando = []
+        ambiguidades = []
+        
+        # Regra 1: Deve haver pelo menos uma pessoa e um projeto
+        if not pessoas_validas:
+            dados_faltando.append("pessoa responsável")
+        if not projetos_validos:
+            dados_faltando.append("projeto")
+        
+        # Regra 2: Data não pode ser anterior à data atual
+        if datas_validas and min(datas_validas) < datetime.now():
+            conflitos.append("data anterior à data atual")
+        
+        # Regra 3: Verificar se há ambiguidades nas entidades
+        if len(pessoas_validas) > 1:
+            ambiguidades.append("múltiplas pessoas responsáveis")
+        if len(projetos_validos) > 1:
+            ambiguidades.append("múltiplos projetos")
+        
+        logger.info("Validação de intenções concluída!")
+        return {
+            'valido': not (conflitos or dados_faltando or ambiguidades),
+            'conflitos': conflitos,
+            'dados_faltando': dados_faltando,
+            'ambiguidades': ambiguidades,
+            'entidades_validas': {
+                'pessoas': pessoas_validas,
+                'projetos': projetos_validos,
+                'datas': datas_validas
+            },
+            'acao': intencoes['acao'],
+            'prioridade': intencoes['prioridade'],
+            'texto_processado': intencoes['texto_processado']
+        }
+
     def validar_acoes(self, acoes: list) -> dict:
         """
         Valida as ações identificadas.
