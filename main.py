@@ -38,71 +38,53 @@ class SistemaMultiagentes:
         logger.info("Todos os agentes inicializados com sucesso!")
 
     def processar_transcricao(self, texto: str) -> dict:
-        """
-        Processa uma transcrição completa através de todos os agentes.
-        
-        Args:
-            texto (str): Texto da transcrição ou comando
-            
-        Returns:
-            dict: Resultado do processamento completo
-        """
+        """Processa uma transcrição de áudio ou texto e executa as ações necessárias no Monday.com."""
         logger.info("Iniciando processamento de transcrição...")
         
-        # 1. Pré-processamento com AgentePre
-        logger.info("Processando texto com AgentePre...")
-        resultado_pre = self.agentes['pre'].processar_texto(texto)
-        
-        # 2. Análise semântica com AgenteAnalista
-        logger.info("Analisando texto com AgenteAnalista...")
-        intencoes = self.agentes['analista'].analisar_intencoes(
-            resultado_pre['texto_processado'],
-            resultado_pre['metadados']
-        )
-        
-        # 3. Validação com AgenteValidador
-        logger.info("Validando dados com AgenteValidador...")
-        validacao = self.agentes['validador'].validar_entidades(
-            intencoes['entidades']
-        )
-        
-        # Se houver erros de validação, retornar
-        if validacao['status'] == 'falha':
+        try:
+            # 1. Processar texto com AgentePre
+            logger.info("Processando texto com AgentePre...")
+            resultado_pre = self.agentes['pre'].processar_texto(texto)
+            
+            # 2. Analisar intenções com AgenteAnalista
+            logger.info("Analisando texto com AgenteAnalista...")
+            intencoes = self.agentes['analista'].analisar_intencoes(resultado_pre)
+            
+            # 3. Validar dados com AgenteValidador
+            logger.info("Validando dados com AgenteValidador...")
+            validacao = self.agentes['validador'].validar_intencoes(intencoes)
+            
+            # Se houver erros de validação, retornar mensagem
+            if not validacao['valido']:
+                return {
+                    'sucesso': False,
+                    'mensagem': f"Erro de validação: {', '.join(validacao['conflitos'] + validacao['dados_faltando'] + validacao['ambiguidades'])}"
+                }
+            
+            # 4. Mapear dados para Monday.com
+            logger.info("Mapeando dados para Monday.com...")
+            payload = self.agentes['mapeamap'].criar_payload_mutation(validacao)
+            
+            # 5. Executar mutation
+            logger.info("Executando mutation no Monday.com...")
+            resultado = self.agentes['executor'].executar_mutation(payload)
+            
+            # 6. Registrar operação com AgenteBoss
+            logger.info("Registrando operação com AgenteBoss...")
+            self.agentes['boss'].registrar_operacao(resultado)
+            
             return {
-                'status': 'falha',
-                'erros': validacao['erros'],
-                'mensagem': 'Validação falhou'
+                'sucesso': True,
+                'resultado': resultado,
+                'metricas': self.agentes['boss'].obter_metricas_operacao()
             }
-        
-        # 4. Mapeamento para Monday.com com AgenteMapeaMap
-        logger.info("Mapeando dados para Monday.com...")
-        payload = self.agentes['mapeamap'].criar_payload_mutation(intencoes)
-        
-        # 5. Execução na API com AgenteExecutor
-        logger.info("Executando operação na API do Monday.com...")
-        resultado = self.agentes['executor'].executar_mutation(payload)
-        
-        # 6. Registrar operação no AgenteBoss
-        logger.info("Registrando operação no AgenteBoss...")
-        self.agentes['boss'].registrar_operacao(
-            'executor',
-            'executar_mutation',
-            resultado
-        )
-        
-        # 7. Gerar relatório final
-        relatorio = {
-            'status': resultado['status'],
-            'texto_original': texto,
-            'texto_processado': resultado_pre['texto_processado'],
-            'intencoes': intencoes,
-            'resultado_monday': resultado,
-            'tempo_execucao': resultado.get('tempo_execucao', 0),
-            'erros': resultado.get('erros', [])
-        }
-        
-        logger.info("Processamento concluído!")
-        return relatorio
+            
+        except Exception as e:
+            logger.error(f"Erro durante processamento: {str(e)}")
+            return {
+                'sucesso': False,
+                'mensagem': f"Erro durante processamento: {str(e)}"
+            }
 
     def analisar_desempenho(self) -> dict:
         """Analisa o desempenho geral do sistema"""
