@@ -39,20 +39,18 @@ class AgenteBoss:
         
         logger.info("AgenteBoss inicializado com sucesso!")
 
-    def registrar_operacao(self, agente: str, acao: str, resultado: dict):
+    def registrar_operacao(self, resultado: dict):
         """
         Registra uma operação no histórico.
         
         Args:
-            agente (str): Nome do agente
-            acao (str): Ação executada
             resultado (dict): Resultado da operação
         """
         registro = {
             'timestamp': datetime.now(),
-            'agente': agente,
-            'acao': acao,
-            'resultado': resultado.get('status', 'falha'),
+            'agente': 'executor',
+            'acao': resultado.get('acao', 'desconhecida'),
+            'resultado': 'sucesso' if resultado.get('sucesso', False) else 'falha',
             'tempo_execucao': resultado.get('tempo_execucao', 0),
             'erro': resultado.get('erro')
         }
@@ -62,7 +60,7 @@ class AgenteBoss:
             pd.DataFrame([registro])
         ], ignore_index=True)
         
-        logger.info(f"Operação registrada: {agente} - {acao}")
+        logger.info(f"Operação registrada: executor - {resultado.get('acao', 'desconhecida')}")
 
     def analisar_desempenho(self) -> dict:
         """
