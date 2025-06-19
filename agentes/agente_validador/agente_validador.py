@@ -190,8 +190,9 @@ class AgenteValidador:
         return True
 
     def validar_intencoes(self, intencoes: dict) -> dict:
-        """Valida as intenções e entidades extraídas do texto."""
+        """Valida as intenções extraídas do texto."""
         logger.info("Iniciando validação de intenções...")
+        inicio_validacao = datetime.now()
         
         # Validar entidades
         entidades = intencoes['entidades_validas']
