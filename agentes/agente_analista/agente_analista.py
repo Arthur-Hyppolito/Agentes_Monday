@@ -104,34 +104,27 @@ class AgenteAnalista:
         logger.info("Ações identificadas com sucesso!")
         return acoes
 
-    def analisar_intencoes(self, texto: str, entidades: dict) -> dict:
-        """
-        Analisa as intenções do texto baseado nas entidades e ações.
-        
-        Args:
-            texto (str): Texto processado
-            entidades (dict): Entidades extraídas
-            
-        Returns:
-            dict: Análise de intenções
-        """
+    def analisar_intencoes(self, texto_processado):
+        """Analisa o texto processado para identificar intenções e ações."""
         logger.info("Analisando intenções do texto...")
         
-        # Identificar ações
-        acoes = self.identificar_acoes(texto)
-        
-        # Criar estrutura de intenções
-        intencoes = {
-            'entidades_validas': entidades,
-            'acoes': acoes,
-            'objetivo': None,
-            'prioridade': None
+        # Extração de entidades com spaCy
+        doc = self.nlp(texto_processado)
+        entidades = {
+            'pessoas': [ent.text for ent in doc.ents if ent.label_ == 'PER'],
+            'datas': [ent.text for ent in doc.ents if ent.label_ == 'DATE'],
+            'projetos': [ent.text for ent in doc.ents if ent.label_ == 'ORG']
         }
         
-        # Determinar o objetivo principal
-        if acoes:
-            # Selecionar ação com maior confiança
-            principal = max(acoes, key=lambda x: x['confianca'])
+        # Identificação de ações com BERT
+        logger.info("Identificando ações no texto...")
+        inputs = self.tokenizer(
+            texto_processado,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=512
+        )
             intencoes['objetivo'] = principal['tipo']
             
             # Determinar prioridade baseado no contexto
