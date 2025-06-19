@@ -293,7 +293,8 @@ class AgenteValidador:
             },
             'acao': intencoes['acao'],
             'prioridade': intencoes['prioridade'],
-            'texto_processado': intencoes['texto_processado']
+            'texto_processado': intencoes['texto_processado'],
+            'sucesso': True
         }
 
     def validar_acoes(self, acoes: list) -> dict:
