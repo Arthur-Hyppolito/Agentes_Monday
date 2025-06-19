@@ -37,10 +37,8 @@ class AgentePre:
         
         logger.info("AgentePre inicializado com sucesso!")
 
-    def processar_texto(self, texto: str) -> dict:
-        """
-        Processa o texto de entrada, realizando limpeza e pré-processamento.
-        
+    def processar_texto(self, texto: str) -> str:
+        """Processa o texto bruto, removendo caracteres especiais e aplicando limpeza."""
         logger.info("Iniciando processamento do texto...")
         
         # 1. Remover caracteres especiais
@@ -50,12 +48,10 @@ class AgentePre:
         tokens = word_tokenize(texto_limpo, language='portuguese')
         
         # 3. Remover stopwords
-        stop_words = set(stopwords.words('portuguese'))
-        tokens_filtrados = [token for token in tokens if token.lower() not in stop_words]
+        tokens_filtrados = [token for token in tokens if token.lower() not in self.stop_words]
         
         # 4. Lematização
-        lemmatizer = WordNetLemmatizer()
-        tokens_lematizados = [lemmatizer.lemmatize(token) for token in tokens_filtrados]
+        tokens_lematizados = [self.lemmatizer.lemmatize(token) for token in tokens_filtrados]
         
         # 5. Reconstituir texto
         texto_processado = ' '.join(tokens_lematizados)
