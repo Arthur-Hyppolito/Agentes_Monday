@@ -282,6 +282,7 @@ class AgenteValidador:
         
         logger.info("Validação de intenções concluída!")
         return {
+            'sucesso': True,
             'valido': not (conflitos or dados_faltando or ambiguidades),
             'conflitos': conflitos,
             'dados_faltando': dados_faltando,
@@ -293,8 +294,7 @@ class AgenteValidador:
             },
             'acao': intencoes['acao'],
             'prioridade': intencoes['prioridade'],
-            'texto_processado': intencoes['texto_processado'],
-            'sucesso': True
+            'texto_processado': intencoes['texto_processado']
         }
 
     def validar_acoes(self, acoes: list) -> dict:
