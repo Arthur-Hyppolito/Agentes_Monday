@@ -5,6 +5,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 import spacy
+from datetime import datetime
 from config import Config
 
 # Baixar recursos do NLTK
