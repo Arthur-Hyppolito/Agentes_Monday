@@ -14,7 +14,10 @@ resultado = sistema.processar_transcricao(texto)
 
 # Mostrar resultados
 print(f"\nResultados:")
-print(f"Entidades válidas: {resultado['entidades_validas']}")
-print(f"Ação: {resultado['acao']}")
-print(f"Prioridade: {resultado['prioridade']}")
-print(f"Métricas: {resultado['metricas']}")
+if not resultado.get('sucesso', False):
+    print(f"Erro: {resultado.get('mensagem', 'Falha desconhecida')}")
+else:
+    print(f"Entidades válidas: {resultado['entidades_validas']}")
+    print(f"Ação: {resultado['acao']}")
+    print(f"Prioridade: {resultado['prioridade']}")
+    print(f"Métricas: {resultado['metricas']}")
