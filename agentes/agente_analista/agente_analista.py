@@ -125,15 +125,40 @@ class AgenteAnalista:
             truncation=True,
             max_length=512
         )
-            intencoes['objetivo'] = principal['tipo']
-            
-            # Determinar prioridade baseado no contexto
-            if 'urgente' in texto.lower():
-                intencoes['prioridade'] = 'alta'
-            elif 'importante' in texto.lower():
-                intencoes['prioridade'] = 'média'
-            else:
-                intencoes['prioridade'] = 'baixa'
         
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+            
+        # Obter a predição
+        predicoes = torch.argmax(outputs.logits, dim=-1).item()
+        
+        # Mapear para ações
+        acoes = [
+            "criar_tarefa",
+            "atualizar_tarefa",
+            "mover_tarefa",
+            "comentar_tarefa"
+        ]
+        
+        # Análise de prioridade
+        prioridades = {
+            'alta': ['urgente', 'imediato', 'prioridade alta'],
+            'media': ['importante', 'necessário', 'prioridade média'],
+            'baixa': ['pode esperar', 'não urgente', 'prioridade baixa']
+        }
+        
+        prioridade = 'media'
+        for nivel, palavras in prioridades.items():
+            if any(palavra in texto_processado.lower() for palavra in palavras):
+                prioridade = nivel
+                break
+        
+        logger.info("Ações identificadas com sucesso!")
         logger.info("Análise de intenções concluída!")
-        return intencoes
+        
+        return {
+            'entidades_validas': entidades,
+            'acao': acoes[predicoes],
+            'prioridade': prioridade,
+            'texto_processado': texto_processado
+        }
