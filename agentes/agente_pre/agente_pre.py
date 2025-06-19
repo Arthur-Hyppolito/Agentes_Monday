@@ -68,7 +68,7 @@ class AgentePre:
         # 8. Gerar metadados
         metadados = {
             'palavras_unicas': len(set(tokens_filtrados)),
-            'sentencas': len(doc.sents),
+            'sentencas': sum(1 for _ in doc.sents),
             'data_processamento': str(doc._.date)
         }
         
