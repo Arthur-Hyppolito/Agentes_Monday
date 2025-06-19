@@ -294,7 +294,11 @@ class AgenteValidador:
             },
             'acao': intencoes['acao'],
             'prioridade': intencoes['prioridade'],
-            'texto_processado': intencoes['texto_processado']
+            'texto_processado': intencoes['texto_processado'],
+            'metricas': {
+                'tempo_validacao': datetime.now() - inicio_validacao,
+                'entidades_validadas': len(pessoas_validas) + len(projetos_validos) + len(datas_validas)
+            }
         }
 
     def validar_acoes(self, acoes: list) -> dict:
