@@ -16,14 +16,18 @@ logger = logging.getLogger(__name__)
 
 class AgentePre:
     def __init__(self):
-        """Inicializa o AgentePre com os recursos necessários"""
-        logger.info("Inicializando AgentePre...")
+        """Inicializa o AgentePre com as configurações necessárias."""
+        logging.info("Inicializando AgentePre...")
         
-        # Carregar o modelo do spaCy
+        # Carregar modelo spaCy em português
         try:
-            self.nlp = spacy.load(Config.NLP_MODEL)
-        except OSError:
-            logger.error(f"Modelo do spaCy não encontrado: {Config.NLP_MODEL}")
+            self.nlp = spacy.load('pt_core_news_lg')
+            
+            # Registrar extensão para data de processamento
+            spacy.tokens.Doc.set_extension('date', default=datetime.now())
+            logging.info("Modelo spaCy carregado com sucesso!")
+        except Exception as e:
+            logging.error(f"Erro ao carregar modelo spaCy: {str(e)}")
             raise
         
         # Configurar recursos do NLTK
